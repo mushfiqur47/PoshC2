@@ -453,9 +453,6 @@ class Payloads(object):
 
 
     def CreateEXEFiles(self, sourcefile, payloadtype, name=""):
-        self.QuickstartLog("Payload written to: %s%s%s_%s_x64.exe" % (self.BaseDirectory, name, payloadtype.value, sourcefile.replace(".c","")))
-        self.QuickstartLog("Payload written to: %s%s%s_%s_x86.exe" % (self.BaseDirectory, name, payloadtype.value, sourcefile.replace(".c","")))
-
         # Get the first URL and the default migration process from the config
         migrate_process = DefaultMigrationProcess
         if "\\" in migrate_process and "\\\\" not in migrate_process:
@@ -535,8 +532,16 @@ class Payloads(object):
             f.write(content)
 
         # Compile the exe
-        subprocess.check_output("x86_64-w64-mingw32-gcc -w %s%s%s_%s_x64.c -o %s%s%s_%s_x64.exe" % (self.BaseDirectory, name, payloadtype.value, sourcefile.replace(".c",""), self.BaseDirectory, name, payloadtype.value, sourcefile.replace(".c","")), shell=True)
-        subprocess.check_output("i686-w64-mingw32-gcc -w %s%s%s_%s_x86.c -o %s%s%s_%s_x86.exe" % (self.BaseDirectory, name, payloadtype.value, sourcefile.replace(".c",""), self.BaseDirectory, name, payloadtype.value, sourcefile.replace(".c","")), shell=True)
+        if "dllmain" in content.lower():
+            subprocess.check_output("x86_64-w64-mingw32-gcc -w -shared %s%s%s_%s_x64.c -o %s%s%s_%s_x64.dll" % (self.BaseDirectory, name, payloadtype.value, sourcefile.replace(".c",""), self.BaseDirectory, name, payloadtype.value, sourcefile.replace(".c","")), shell=True)
+            subprocess.check_output("i686-w64-mingw32-gcc -w -shared %s%s%s_%s_x86.c -o %s%s%s_%s_x86.dll" % (self.BaseDirectory, name, payloadtype.value, sourcefile.replace(".c",""), self.BaseDirectory, name, payloadtype.value, sourcefile.replace(".c","")), shell=True)
+            self.QuickstartLog("Payload written to: %s%s%s_%s_x64.dll" % (self.BaseDirectory, name, payloadtype.value, sourcefile.replace(".c","")))
+            self.QuickstartLog("Payload written to: %s%s%s_%s_x86.dll" % (self.BaseDirectory, name, payloadtype.value, sourcefile.replace(".c","")))
+        else:
+            subprocess.check_output("x86_64-w64-mingw32-gcc -w %s%s%s_%s_x64.c -o %s%s%s_%s_x64.exe" % (self.BaseDirectory, name, payloadtype.value, sourcefile.replace(".c",""), self.BaseDirectory, name, payloadtype.value, sourcefile.replace(".c","")), shell=True)
+            subprocess.check_output("i686-w64-mingw32-gcc -w %s%s%s_%s_x86.c -o %s%s%s_%s_x86.exe" % (self.BaseDirectory, name, payloadtype.value, sourcefile.replace(".c",""), self.BaseDirectory, name, payloadtype.value, sourcefile.replace(".c","")), shell=True)
+            self.QuickstartLog("Payload written to: %s%s%s_%s_x64.exe" % (self.BaseDirectory, name, payloadtype.value, sourcefile.replace(".c","")))
+            self.QuickstartLog("Payload written to: %s%s%s_%s_x86.exe" % (self.BaseDirectory, name, payloadtype.value, sourcefile.replace(".c","")))
 
 
     def CreateMacro(self, name=""):
